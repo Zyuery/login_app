@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮箱登录界面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #loginForm {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+        .success {
+            color: green;
+            margin-bottom: 10px;
+        }
+        #captchaBlock {
+            display: none;
+        }
+        #captchaImg {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .small-text {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<form id="loginForm" action="/user/login_email" method="post">
+    <h2>用户登录</h2>
+    <label for="email">邮箱:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+    <label for="verificationCode">邮箱验证码:</label><br>
+    <input type="text" id="verificationCode" name="verificationCode" required><br><br>
+    <button type="button" onclick="sendVerificationCode()">发送邮箱验证码</button><br><br>
+
+    <div id="captchaBlock">
+        <label for="captcha">验证码：</label><br>
+        <input type="text" id="captcha" name="captcha" ><br><br>
+        <img id="captchaImg" src="/vc.jpg" alt="验证码"><br>
+        <button type="button" onclick="refreshCaptcha()">刷新验证码</button><br><br>
+    </div>
+
+    <input type="submit" value="登录">
+
+    <div class="small-text">
+        <a href="/user/login">用户密码登录</a> | <a href="/user/register">注册用户</a>
+    </div>
+</form>
+
+<script>
+    // 刷新验证码图片
+    function refreshCaptcha() {
+        var img = document.getElementById('captchaImg');
+        img.src = '/vc.jpg?' + new Date().getTime(); // 添加时间戳防止缓存
+    }
+
+    // 发送验证码函数
+    function sendVerificationCode() {
+        var email = document.getElementById('email').value;
+
+        // 输出 email 的值到控制台
+        console.log('Email:', email);
+        const formData = new URLSearchParams();
+        formData.append('email',email);
+        // 发送验证码的逻辑（保持原有的 fetch 请求）
+        fetch('/sendVerificationCode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Verification code sent successfully');
+                } else {
+                    alert('Failed to send verification code');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending verification code:', error);
+                alert('Failed to send verification code');
+            });
+    }
+    fetch('/get_error-count')
+        .then(response => response.json())
+        .then(data => {
+            console.log('errorCount:', data.errorCount);
+            if (data.errorCount >= 1) {
+                document.getElementById('captchaBlock').style.display = 'block';
+            } else {
+                document.getElementById('captchaBlock').style.display = 'none';
+            }
+        })
+        .catch(error => console.error('获取错误次数失败:', error));
+</script>
+</body>
+</html>

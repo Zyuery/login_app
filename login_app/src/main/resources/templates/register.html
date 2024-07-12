@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Page</title>
+  <!-- 引入 Vue.js 的 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #register-form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .error {
+      color: red;
+      margin-bottom: 10px;
+    }
+    .success {
+      color: green;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="register-form">
+    <h2>Register</h2>
+    <form @submit.prevent="register">
+      <label for="username">Username:</label>
+      <input type="text" id="username" v-model="username" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" v-model="password" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" v-model="email" required>
+
+      <button type="submit">Register</button>
+
+      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="successMessage" class="success">{{ successMessage }}</p>
+    </form>
+  </div>
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      username: '',
+      password: '',
+      email: '',
+      error: '',
+      successMessage: ''
+    },
+    methods: {
+      register() {
+        console.log('Registering...');
+
+        const requestData = {
+          uname: this.username,
+          password: this.password,
+          email: this.email
+        };
+
+        fetch('/user/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  this.successMessage = 'Registration successful!';
+                  // 注册成功后跳转到登录页面
+                  setTimeout(() => {
+                    window.location.href = '/user/login'; // 根据实际情况修改跳转路径
+                  }, 1500); // 延时 1.5 秒后跳转
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  this.error = 'Failed to register. Please try again later.';
+                });
+      }
+    }
+  });
+</script>
+</body>
+</html>
+
